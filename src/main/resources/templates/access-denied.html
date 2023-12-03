@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <th:block th:insert="~{fragments/header}"></th:block>
+    </head>
+    <body>
+        <div th:replace="~{fragments/floating_button}"></div>
+
+        <div class="d-flex align-items-center justify-content-center vh-100">
+            <div class="text-center">
+                <h1 class="display-1 fw-bold" th:text="#{aaccden}"></h1>
+                <p class="fs-3"> <span class="text-danger" th:text="#{oopsi}"></span>[[#{badway}]]</p>
+                <a href="/" class="btn btn-primary" th:text="#{hhome}"></a>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/footer :: div}"></div>
+    </body>
+</html>
