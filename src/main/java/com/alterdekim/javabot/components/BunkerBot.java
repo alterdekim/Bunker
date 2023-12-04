@@ -50,6 +50,7 @@ public class BunkerBot extends TelegramLongPollingBot {
 
     private DayNightFields dayNightFields;
 
+    @SuppressWarnings("deprecation")
     public BunkerBot(TelegramConfig telegramConfig,
                      BioService bioService,
                      HealthService healthService,
@@ -78,6 +79,7 @@ public class BunkerBot extends TelegramLongPollingBot {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public String getBotToken() {
         return telegramConfig.getBotToken();
     }
