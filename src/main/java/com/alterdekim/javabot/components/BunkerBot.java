@@ -11,9 +11,11 @@ import com.alterdekim.javabot.util.GameState;
 import com.alterdekim.javabot.util.HashUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,7 +27,9 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -50,6 +54,8 @@ public class BunkerBot extends TelegramLongPollingBot {
 
     private DayNightFields dayNightFields;
 
+    private ConcurrentLinkedQueue<BotApiMethod<? extends Serializable>> linkedQueue;
+
     @SuppressWarnings("deprecation")
     public BunkerBot(TelegramConfig telegramConfig,
                      BioService bioService,
@@ -71,7 +77,15 @@ public class BunkerBot extends TelegramLongPollingBot {
         this.disasterService = disasterService;
         this.random = new Random();
         this.dayNightFields = new DayNightFields();
+        this.linkedQueue = new ConcurrentLinkedQueue<>();
     }
+
+    @Scheduled(fixedRate = 100)
+    private void executeApi() {
+        if( !this.linkedQueue.isEmpty() )
+            sendApiMethodAsync(this.linkedQueue.poll());
+    }
+
 
     @Override
     public String getBotUsername() {
@@ -95,7 +109,7 @@ public class BunkerBot extends TelegramLongPollingBot {
         if( !hasPlayerWithId(user.getId()) ) {
             if( canWrite(user) ) {
                 this.players.add(new Player(user.getId(), user.getFirstName()));
-                sendApiMethodAsync(
+                sendApi(
                         new SendMessage(
                                 groupId,
                                 String.format(
@@ -111,14 +125,14 @@ public class BunkerBot extends TelegramLongPollingBot {
             if( msgid != 0 ) {
                 SendMessage sm = new SendMessage(groupId, Constants.CANT_JOIN_NOT_STARTED);
                 sm.setReplyToMessageId(msgid);
-                sendApiMethodAsync(sm);
+                sendApi(sm);
                 return;
             }
-            SendMessage sm = new SendMessage(groupId, BotUtils.mentionUser(user.getId(), user.getFirstName()) + Constants.CANT_JOIN_NOT_STARTED);
-            sendApiMethodAsync(sm);
+            SendMessage sm = new SendMessage(groupId, BotUtils.mentionUser(user.getUserName()) + Constants.CANT_JOIN_NOT_STARTED);
+            sendApi(sm);
             return;
         }
-        sendApiMethodAsync(
+        sendApi(
                 new SendMessage(
                         groupId,
                         Constants.ALREADY_IN_GAME
@@ -135,7 +149,7 @@ public class BunkerBot extends TelegramLongPollingBot {
         } catch ( Exception e ) {
             return false;
         }
-        sendApiMethodAsync(new DeleteMessage(u.getId()+"", mr.getMessageId()));
+        sendApi(new DeleteMessage(u.getId()+"", mr.getMessageId()));
         return true;
     }
 
@@ -153,12 +167,12 @@ public class BunkerBot extends TelegramLongPollingBot {
         if( gameState != GameState.JOINING )
             return;
         if(players.size() < 2) {
-            sendApiMethodAsync(new SendMessage(groupId, Constants.PLAYERS_LESS_THAN_ZERO));
+            sendApi(new SendMessage(groupId, Constants.PLAYERS_LESS_THAN_ZERO));
             return;
         }
         this.gameState = GameState.STARTED;
         Disaster d = (Disaster) BotUtils.getRandomFromList(disasterService.getAllDisasters(), random);
-        sendApiMethodAsync(new SendMessage(groupId, getStringById(d.getDescTextId())));
+        sendApi(new SendMessage(groupId, getStringById(d.getDescTextId())));
         List<Bio> bios = bioService.getAllBios();
         List<Work> works = workService.getAllWorks();
         List<Luggage> luggs = luggageService.getAllLuggages();
@@ -173,7 +187,7 @@ public class BunkerBot extends TelegramLongPollingBot {
             p.setHealth((Health) BotUtils.getRandomFromList(healths, random));
 
             SendMessage sendMessage = new SendMessage(p.getTelegramId()+"", BotAccountProfileGenerator.build(textDataValService, p));
-            sendApiMethodAsync(sendMessage);
+            sendApi(sendMessage);
         }
         doNight();
     }
@@ -186,7 +200,7 @@ public class BunkerBot extends TelegramLongPollingBot {
         for( Player p : players ) {
             SendMessage sendMessage = new SendMessage(p.getTelegramId()+"", Constants.SHOW_TIME);
             sendMessage.setReplyMarkup(BotUtils.getShowKeyboard(p.getInfoSections()));
-            sendApiMethodAsync(sendMessage);
+            sendApi(sendMessage);
         }
     }
 
@@ -238,9 +252,15 @@ public class BunkerBot extends TelegramLongPollingBot {
             }
             setIsAnswered(callbackQuery.getFrom().getId());
             updateInfoSections(p, ins);
+            sendApi(new SendMessage(callbackQuery.getMessage().getChatId()+"", Constants.THANK_YOU));
+            sendApi(new DeleteMessage(callbackQuery.getMessage().getChatId()+"", callbackQuery.getMessage().getMessageId()));
             if( isAllAnswered() )
                 doDay();
         }
+    }
+    
+    private void sendApi(BotApiMethod<? extends Serializable> method) {
+        this.linkedQueue.add(method);
     }
 
     private void updateInfoSections(Player p1, InfoSections infoSections) {
@@ -257,8 +277,8 @@ public class BunkerBot extends TelegramLongPollingBot {
 
     private void doDay() {
         dayNightFields.setIsNight(false);
-        sendApiMethodAsync(new SendMessage(groupId, String.format(Constants.DAY_MESSAGE, Math.floor(LiveFormula.calc(players)*100d))));
-        sendApiMethodAsync(new SendMessage(groupId, dayNightFields.getDayMessage()));
+        sendApi(new SendMessage(groupId, String.format(Constants.DAY_MESSAGE, Math.floor(LiveFormula.calc(players)*100d))));
+        sendApi(new SendMessage(groupId, dayNightFields.getDayMessage()));
         dayNightFields.setDayMessage("");
         setAllNotAnswered();
         setAllNotVoted();
@@ -292,14 +312,59 @@ public class BunkerBot extends TelegramLongPollingBot {
         return players.stream().allMatch(Player::getIsAnswered);
     }
 
+    private void showInfo() {
+        if( this.dayNightFields.getIsNight() ) {
+            sendApi(new SendMessage(groupId, Constants.CANT_SEND_NOT_DAY));
+            return;
+        }
+        String message = Constants.INFO_MESSAGE;
+        for( Player p : players ) {
+            message += p.getFirstName() + ":\n";
+            InfoSections s = p.getInfoSections();
+            if(s.getIsGenderShowed()) {
+                message += String.format(Constants.GENDER_MESAGE, p.getFirstName(),  getStringById(p.getGender().getGenderTextId()),
+                        p.getGender().getCanDie() ? Constants.TRUE : Constants.FALSE,
+                        p.getGender().getIsMale() ? Constants.TRUE : Constants.FALSE,
+                        p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE,
+                        p.getGender().getIsChildfree() ? Constants.TRUE : Constants.FALSE) + "\n";
+            }
+            if(s.getIsAgeShowed()) {
+                message += String.format(Constants.AGE_MESSAGE, p.getFirstName(), p.getAge()) + "\n";
+            }
+            if(s.getIsLuggageShowed()) {
+                message += String.format(Constants.LUGG_MESSAGE, p.getFirstName(),
+                        getStringById(p.getLuggage().getTextNameId()),
+                        getStringById(p.getLuggage().getTextDescId())) + "\n";
+            }
+            if(s.getIsHealthShowed()) {
+                message += String.format(Constants.HEALTH_MESSAGE, p.getFirstName(), getStringById(p.getHealth().getTextNameId()),
+                        getStringById(p.getHealth().getTextDescId()),
+                        (int) (p.getHealth().getHealth_index()*100f)) + "\n";
+            }
+            if(s.getIsWorkShowed()) {
+                message += String.format(Constants.WORK_MESSAGE, p.getFirstName(),
+                        getStringById(p.getWork().getTextNameId()),
+                        getStringById(p.getWork().getTextDescId())) + "\n";
+            }
+            if(s.getIsHobbyShowed()) {
+                message += String.format(Constants.HOBBY_MESSAGE, p.getFirstName(),
+                        getStringById(p.getHobby().getTextDescId())) + "\n";
+            }
+            message += "\n";
+        }
+        sendApi(new SendMessage(groupId, message));
+    }
+
     private void endVote() {
         Integer max = dayNightFields.getPoll().values().stream().max(Integer::compareTo).get();
         long count = dayNightFields.getPoll().values().stream().filter(p -> p.equals(max)).count();
         SendMessage sendMessage = new SendMessage(groupId, Constants.ENDVOTE);
-        if( count > 1 )
+        if( count > 1 ) {
             sendMessage = new SendMessage(groupId, Constants.DRAW);
-        sendApiMethodAsync(sendMessage);
-        removeVotePlayers(max);
+        } else {
+            removeVotePlayers(max);
+        }
+        sendApi(sendMessage);
         if( !checkEndGame() ) {
             doNight();
             return;
@@ -312,16 +377,15 @@ public class BunkerBot extends TelegramLongPollingBot {
     }
 
     private void endGame() {
-        if(!players.isEmpty() && random.nextDouble() <= LiveFormula.calc(players)) {
-            sendApiMethodAsync(new SendMessage(groupId, String.format(Constants.WIN_MESSAGE,
+        sendApi(new SendMessage(groupId, String.format(Constants.END_GAME, Math.floor(LiveFormula.calc(players)*100d))));
+        if(!players.isEmpty() && Math.floor(random.nextDouble()*100d) <= Math.floor(LiveFormula.calc(players)*100d)) {
+            sendApi(new SendMessage(groupId, String.format(Constants.WIN_MESSAGE,
                     players.stream().map(Player::getFirstName).collect(Collectors.joining(", "))
                     )));
         } else {
-            sendApiMethodAsync(new SendMessage(groupId, Constants.LOSE_MESSAGE));
+            sendApi(new SendMessage(groupId, Constants.LOSE_MESSAGE));
         }
-        this.dayNightFields = new DayNightFields();
-        this.players = new ArrayList<>();
-        this.gameState = GameState.NONE;
+        interruptGame();
     }
 
     private void removeVotePlayers(Integer max) {
@@ -330,9 +394,15 @@ public class BunkerBot extends TelegramLongPollingBot {
                 .stream()
                 .filter(e -> e.getValue().equals(max))
                 .forEach(i -> {
-                    sendApiMethodAsync(new SendMessage(groupId, String.format(Constants.REMOVE_PLAYER, players.get(i.getKey()).getFirstName())));
+                    sendApi(new SendMessage(groupId, String.format(Constants.REMOVE_PLAYER, players.get(i.getKey()).getFirstName())));
                     players.remove(i.getKey().intValue());
                 });
+    }
+
+    private void interruptGame() {
+        this.dayNightFields = new DayNightFields();
+        this.players = new ArrayList<>();
+        this.gameState = GameState.NONE;
     }
 
     @Override
@@ -348,13 +418,14 @@ public class BunkerBot extends TelegramLongPollingBot {
                 dayNightFields.getPoll().put(update.getPollAnswer().getOptionIds().get(0), 1);
             }
             setIsVoted(update.getPollAnswer().getUser().getId());
+            sendApi(new SendMessage(groupId, String.format(Constants.USER_VOTED, update.getPollAnswer().getUser().getFirstName())));
             if( isAllVoted() )
                 endVote();
             return;
         }
 
         if( update.hasCallbackQuery() ) {
-            sendApiMethodAsync(
+            sendApi(
                     new AnswerCallbackQuery(
                             update.getCallbackQuery().getId()
                     )
@@ -366,7 +437,7 @@ public class BunkerBot extends TelegramLongPollingBot {
                     startGame();
                     return;
                 }
-                sendApiMethodAsync(new SendMessage(groupId, Constants.NOT_ADMIN_EXCEPTION));
+                sendApi(new SendMessage(groupId, Constants.NOT_ADMIN_EXCEPTION));
             } else if( gameState == GameState.STARTED && dayNightFields.getIsNight() ) {
                 processNightButton(update.getCallbackQuery());
             }
@@ -382,7 +453,7 @@ public class BunkerBot extends TelegramLongPollingBot {
                 update.getMessage().getText().equals(Commands.SET_GROUP)) &&
                 update.getMessage().getFrom().getId().equals(getMasterId()) && gameState == GameState.NONE) {
             groupId = chatId;
-            sendApiMethodAsync(new SendMessage(chatId, Constants.GROUP_SET));
+            sendApi(new SendMessage(chatId, Constants.GROUP_SET));
         }
 
         if( !chatId.equals(groupId) )
@@ -393,14 +464,27 @@ public class BunkerBot extends TelegramLongPollingBot {
                 gameState == GameState.NONE) {
             SendMessage message = new SendMessage(chatId, Constants.START_GAME_MSG);
             message.setReplyMarkup(BotUtils.getJoinKeyboard());
-            sendApiMethodAsync(message);
+            sendApi(message);
             gameState = GameState.JOINING;
         } else if (update.getMessage().getText().equals(Commands.JOIN_GAME + "@" + getBotUsername()) ||
                 update.getMessage().getText().equals(Commands.JOIN_GAME)) {
             joinGame(update.getMessage().getFrom(), update.getMessage().getMessageId());
         } else if (update.getMessage().getText().equals(Commands.HELP + "@" + getBotUsername()) ||
                 update.getMessage().getText().equals(Commands.HELP)) {
-            sendApiMethodAsync(new SendMessage(chatId, Constants.HELP));
+            sendApi(new SendMessage(chatId, Constants.HELP));
+        } else if ((update.getMessage().getText().equals(Commands.STOP_GAME + "@" + getBotUsername()) ||
+                update.getMessage().getText().equals(Commands.STOP_GAME) ) &&
+                gameState != GameState.NONE) {
+            if( isAdmin(update.getMessage().getFrom()) ) {
+                sendApi(new SendMessage(groupId, Constants.INTERRUPT_GAME));
+                interruptGame();
+                return;
+            }
+            sendApi(new SendMessage(groupId, Constants.NOT_ADMIN_EXCEPTION));
+        } else if((update.getMessage().getText().equals(Commands.GET_INFO + "@" + getBotUsername()) ||
+                update.getMessage().getText().equals(Commands.GET_INFO) ) &&
+                gameState == GameState.STARTED) {
+            showInfo();
         }
     }
 

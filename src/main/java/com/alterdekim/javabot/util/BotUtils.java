@@ -89,8 +89,8 @@ public class BotUtils {
         return inlineKeyboardMarkup;
     }
 
-    public static String mentionUser(Long id, String name) {
-        return " ["+name+"](tg://user?id="+id+") ";
+    public static String mentionUser(String name) {
+        return " @"+name+" ";
     }
 
     public static Object getRandomFromList(List list, Random random) {
