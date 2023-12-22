@@ -1,5 +1,6 @@
 package com.alterdekim.javabot.service;
 
+import com.alterdekim.javabot.entities.Synergy;
 import com.alterdekim.javabot.entities.Work;
 import com.alterdekim.javabot.repository.WorkRepository;
 import org.springframework.stereotype.Service;
@@ -33,5 +34,10 @@ public class WorkServiceImpl implements WorkService {
     @Override
     public void saveWork(Work work) {
         repository.save(work);
+    }
+
+    @Override
+    public List<Synergy> getSynergies(Long id) {
+        return repository.getSynergies(id);
     }
 }

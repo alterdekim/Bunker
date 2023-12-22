@@ -1,6 +1,7 @@
 package com.alterdekim.javabot.service;
 
 import com.alterdekim.javabot.entities.Health;
+import com.alterdekim.javabot.entities.Synergy;
 import com.alterdekim.javabot.repository.HealthRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +34,10 @@ public class HealthServiceImpl implements HealthService {
     @Override
     public void saveHealth(Health health) {
         repository.save(health);
+    }
+
+    @Override
+    public List<Synergy> getSynergies(Long id) {
+        return repository.getSynergies(id);
     }
 }

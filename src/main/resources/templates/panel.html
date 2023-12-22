@@ -77,6 +77,7 @@
                                             <li th:text="${ll}"></li>
                                         </ul>
                                     </p>
+                                    <a href="#" th:data-id="${cc.id}" data-bs-toggle="modal" data-bs-target="#modal_syn" onclick="" class="btn btn-primary" th:text="#{eddittsynn}"></a>
                                     <a href="#" th:data-id="${cc.id}" data-bs-toggle="modal" data-bs-target="#modal" onclick="edit_entry(this)" class="btn btn-primary" th:text="#{edditbtn}"></a>
                                     <a href="#" th:data-id="${cc.id}" onclick="remove_entry(this)" class="btn btn-danger" th:text="#{remombtn}"></a>
                                 </div>
@@ -104,6 +105,7 @@
                                             <li th:text="${ll}"></li>
                                         </ul>
                                     </p>
+                                    <a href="#" th:data-id="${cc.id}" data-bs-toggle="modal" data-bs-target="#modal_syn" onclick="show_synergies_modal(this)" class="btn btn-primary" th:text="#{eddittsynn}"></a>
                                     <a href="#" th:data-id="${cc.id}" data-bs-toggle="modal" data-bs-target="#modal" onclick="edit_entry(this)" class="btn btn-primary" th:text="#{edditbtn}"></a>
                                     <a href="#" th:data-id="${cc.id}" onclick="remove_entry(this)" class="btn btn-danger" th:text="#{remombtn}"></a>
                                 </div>
@@ -112,7 +114,44 @@
                     </th:block>
                 </div>
             </th:block>
-
+            <div class="modal fade" id="modal_syn" tabindex="-1" aria-labelledby="ModalLabelSyn" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="ModalLabelSyn" th:text="#{aedentry}"></h1>
+                        </div>
+                        <div class="modal-body">
+                            <form id="synergyForm">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th th:text="#{firentname}"></th>
+                                            <th th:text="#{firenttype}"></th>
+                                            <th th:text="#{secentname}"></th>
+                                            <th th:text="#{secenttype}"></th>
+                                            <th th:text="#{probbval}"></th>
+                                            <th th:text="#{actionbtn}"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table_body_modal">
+                                        <tr>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td><select id="second_select_vals"></select></td>
+                                            <td><select id="second_select_types" name="second_types" onchange="secondTypeChange(this)"><option value="lugg" th:text="#{lugg}"></option><option value="heal" th:text="#{heeal}"></option><option value="hobb" th:text="#{hhobb}"></option><option value="agge" th:text="#{aggend}">Gender</option><option value="prof" th:text="#{pprof}">Profession</option></select></td>
+                                            <td><input id="synergy_prob_input" type="number" value="0.0" min="-1" max="1" step="0.1"/></td>
+                                            <td><button type="button" data-id="0" id="add_synergy_button" class="btn btn-primary" onclick="add_synergy(this)" th:text="#{adddbtn}"></button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-dismiss="modal" th:text="#{cancbt}"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="modal fade" id="modal" tabindex="-1" data-bs-backdrop="static" aria-labelledby="ModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -126,10 +165,6 @@
                                         <div class="mb-3">
                                             <label class="form-check-label" th:text="#{inlcandie}" for="canDie"></label>
                                             <input class="form-check-input" type="checkbox" value="" id="canDie" name="canDie" checked>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-check-label" for="childFree" th:text="#{inlcfr}"></label>
-                                            <input class="form-check-input" type="checkbox" value="" id="childFree" name="childFree">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-check-label" for="ismale" th:text="#{inlismal}"></label>
@@ -200,6 +235,10 @@
                                         <div class="mb-3">
                                             <label for="health_index" class="form-label" th:text="#{inlhin}"></label>
                                             <input type="range" class="form-range" id="health_index" min="0" max="1" step="0.1" name="health_index">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-check-label" for="childFree" th:text="#{inlcfr}"></label>
+                                            <input class="form-check-input" type="checkbox" value="" id="childFree" name="childFree">
                                         </div>
                                         <div class="mb-3">
                                             <label for="heal_name_text" class="col-form-label" th:text="#{inlaname}"></label>

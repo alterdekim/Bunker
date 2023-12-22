@@ -1,6 +1,7 @@
 package com.alterdekim.javabot.service;
 
 import com.alterdekim.javabot.entities.Bio;
+import com.alterdekim.javabot.entities.Synergy;
 import com.alterdekim.javabot.repository.BioRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +34,10 @@ public class BioServiceImpl implements BioService {
     @Override
     public void removeById(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public List<Synergy> getSynergies(Long id) {
+        return repository.getSynergies(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.alterdekim.javabot.service;
 
 import com.alterdekim.javabot.entities.Luggage;
+import com.alterdekim.javabot.entities.Synergy;
 import com.alterdekim.javabot.repository.LuggageRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +34,10 @@ public class LuggageServiceImpl implements LuggageService {
     @Override
     public void saveLuggage(Luggage luggage) {
         repository.save(luggage);
+    }
+
+    @Override
+    public List<Synergy> getSynergies(Long id) {
+        return repository.getSynergies(id);
     }
 }

@@ -66,7 +66,7 @@ public class PanelController {
             Card card = new Card();
             card.setId(b.getId());
             card.setTitle(textDataValService.getTextDataValById(b.getGenderTextId()).getText());
-            card.setBody(Arrays.asList("canDie: " + b.getCanDie(), "isMale: " + b.getIsMale(), "isFemale: " + b.getIsFemale(), "isChildfree: " + b.getIsChildfree()));
+            card.setBody(Arrays.asList("canDie: " + b.getCanDie(), "isMale: " + b.getIsMale(), "isFemale: " + b.getIsFemale()));
             cards.add(card);
         }
         cards.sort(Comparator.comparing(Card::getId));
@@ -81,7 +81,7 @@ public class PanelController {
             Card card = new Card();
             card.setId(b.getId());
             card.setTitle(textDataValService.getTextDataValById(b.getTextDescId()).getText());
-            card.setBody(Arrays.asList("Food: " + b.getFood(), "Heal: " + b.getHeal(), "Power: " + b.getPower(), "Violence:" + b.getViolence()));
+            card.setBody(Arrays.asList("Foodstuffs: " + b.getFoodstuffs(), "Asocial: " + b.getAsocial(), "Power: " + b.getPower(), "Violence:" + b.getViolence()));
             cards.add(card);
         }
         cards.sort(Comparator.comparing(Card::getId));
@@ -96,7 +96,7 @@ public class PanelController {
             Card card = new Card();
             card.setId(b.getId());
             card.setTitle(textDataValService.getTextDataValById(b.getTextNameId()).getText());
-            card.setBody(Arrays.asList("Food: " + b.getFood(), "Heal: " + b.getHeal(), "Power: " + b.getPower(), "Violence:" + b.getViolence(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
+            card.setBody(Arrays.asList("Foodstuffs: " + b.getFoodstuffs(), "Power: " + b.getPower(), "Violence: " + b.getViolence(), "Asocial: " + b.getAsocial(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
             cards.add(card);
         }
         cards.sort(Comparator.comparing(Card::getId));
@@ -111,7 +111,7 @@ public class PanelController {
             Card card = new Card();
             card.setId(b.getId());
             card.setTitle(textDataValService.getTextDataValById(b.getTextNameId()).getText());
-            card.setBody(Arrays.asList("Health index: " + b.getHealth_index(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
+            card.setBody(Arrays.asList("Health index: " + b.getHealth_index(),"isChildfree: " + b.getIsChildfree(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
             cards.add(card);
         }
         cards.sort(Comparator.comparing(Card::getId));
@@ -126,7 +126,7 @@ public class PanelController {
             Card card = new Card();
             card.setId(b.getId());
             card.setTitle(textDataValService.getTextDataValById(b.getTextNameId()).getText());
-            card.setBody(Arrays.asList("Food: " + b.getFood(), "Power: " + b.getPower(), "Heal: " + b.getHeal(), "Violence: " + b.getViolence(), "Is garbage: " + b.getGarbage(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
+            card.setBody(Arrays.asList("Foodstuffs: " + b.getFoodstuffs(), "Power: " + b.getPower(), "Asocial: " + b.getAsocial(), "Violence: " + b.getViolence(), "Is garbage: " + b.getGarbage(), "Description: " + textDataValService.getTextDataValById(b.getTextDescId()).getText()));
             cards.add(card);
         }
         cards.sort(Comparator.comparing(Card::getId));

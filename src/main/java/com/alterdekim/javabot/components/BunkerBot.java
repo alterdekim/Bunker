@@ -49,6 +49,7 @@ public class BunkerBot extends TelegramLongPollingBot {
     private final WorkService workService;
     private final TextDataValService textDataValService;
     private final DisasterService disasterService;
+    private final SynergyService synergyService;
 
     private final Random random;
 
@@ -64,7 +65,8 @@ public class BunkerBot extends TelegramLongPollingBot {
                      LuggageService luggageService,
                      WorkService workService,
                      TextDataValService textDataValService,
-                     DisasterService disasterService) {
+                     DisasterService disasterService,
+                     SynergyService synergyService) {
         this.telegramConfig = telegramConfig;
         this.players = new ArrayList<>();
         this.gameState = GameState.NONE;
@@ -75,6 +77,7 @@ public class BunkerBot extends TelegramLongPollingBot {
         this.workService = workService;
         this.textDataValService = textDataValService;
         this.disasterService = disasterService;
+        this.synergyService = synergyService;
         this.random = new Random();
         this.dayNightFields = new DayNightFields();
         this.linkedQueue = new ConcurrentLinkedQueue<>();
@@ -218,14 +221,14 @@ public class BunkerBot extends TelegramLongPollingBot {
                     dayNightFields.appendMessage(String.format(Constants.GENDER_MESAGE, callbackQuery.getFrom().getFirstName(),  getStringById(p.getGender().getGenderTextId()),
                             p.getGender().getCanDie() ? Constants.TRUE : Constants.FALSE,
                             p.getGender().getIsMale() ? Constants.TRUE : Constants.FALSE,
-                            p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE,
-                            p.getGender().getIsChildfree() ? Constants.TRUE : Constants.FALSE) + "\n");
+                            p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE) + "\n");
                     ins.setIsGenderShowed(true);
                     break;
                 case Constants.HEALTH_BTN:
                     dayNightFields.appendMessage(String.format(Constants.HEALTH_MESSAGE, callbackQuery.getFrom().getFirstName(), getStringById(p.getHealth().getTextNameId()),
                             getStringById(p.getHealth().getTextDescId()),
-                            (int) (p.getHealth().getHealth_index()*100f)) + "\n");
+                            (int) (p.getHealth().getHealth_index()*100f),
+                            p.getHealth().getIsChildfree() ? Constants.TRUE : Constants.FALSE) + "\n");
                     ins.setIsHealthShowed(true);
                     break;
                 case Constants.AGE_BTN:
@@ -277,7 +280,7 @@ public class BunkerBot extends TelegramLongPollingBot {
 
     private void doDay() {
         dayNightFields.setIsNight(false);
-        sendApi(new SendMessage(groupId, String.format(Constants.DAY_MESSAGE, Math.floor(LiveFormula.calc(players)*100d))));
+        sendApi(new SendMessage(groupId, String.format(Constants.DAY_MESSAGE, Math.floor(LiveFormula.calc(players, synergyService.getAllSynergies())*100d))));
         sendApi(new SendMessage(groupId, dayNightFields.getDayMessage()));
         dayNightFields.setDayMessage("");
         setAllNotAnswered();
@@ -325,8 +328,7 @@ public class BunkerBot extends TelegramLongPollingBot {
                 message += String.format(Constants.GENDER_MESAGE, p.getFirstName(),  getStringById(p.getGender().getGenderTextId()),
                         p.getGender().getCanDie() ? Constants.TRUE : Constants.FALSE,
                         p.getGender().getIsMale() ? Constants.TRUE : Constants.FALSE,
-                        p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE,
-                        p.getGender().getIsChildfree() ? Constants.TRUE : Constants.FALSE) + "\n";
+                        p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE) + "\n";
             }
             if(s.getIsAgeShowed()) {
                 message += String.format(Constants.AGE_MESSAGE, p.getFirstName(), p.getAge()) + "\n";
@@ -339,7 +341,8 @@ public class BunkerBot extends TelegramLongPollingBot {
             if(s.getIsHealthShowed()) {
                 message += String.format(Constants.HEALTH_MESSAGE, p.getFirstName(), getStringById(p.getHealth().getTextNameId()),
                         getStringById(p.getHealth().getTextDescId()),
-                        (int) (p.getHealth().getHealth_index()*100f)) + "\n";
+                        (int) (p.getHealth().getHealth_index()*100f),
+                        p.getHealth().getIsChildfree() ? Constants.TRUE : Constants.FALSE) + "\n";
             }
             if(s.getIsWorkShowed()) {
                 message += String.format(Constants.WORK_MESSAGE, p.getFirstName(),
@@ -377,8 +380,9 @@ public class BunkerBot extends TelegramLongPollingBot {
     }
 
     private void endGame() {
-        sendApi(new SendMessage(groupId, String.format(Constants.END_GAME, Math.floor(LiveFormula.calc(players)*100d))));
-        if(!players.isEmpty() && Math.floor(random.nextDouble()*100d) <= Math.floor(LiveFormula.calc(players)*100d)) {
+        double d = Math.floor(LiveFormula.calc(players, synergyService.getAllSynergies())*100d);
+        sendApi(new SendMessage(groupId, String.format(Constants.END_GAME, d)));
+        if(!players.isEmpty() && Math.floor(random.nextDouble()*100d) <= d) {
             sendApi(new SendMessage(groupId, String.format(Constants.WIN_MESSAGE,
                     players.stream().map(Player::getFirstName).collect(Collectors.joining(", "))
                     )));

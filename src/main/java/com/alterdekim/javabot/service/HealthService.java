@@ -1,6 +1,7 @@
 package com.alterdekim.javabot.service;
 
 import com.alterdekim.javabot.entities.Health;
+import com.alterdekim.javabot.entities.Synergy;
 
 import java.util.List;
 
@@ -11,4 +12,6 @@ public interface HealthService {
     void removeById(long healthId);
 
     void saveHealth(Health health);
+
+    List<Synergy> getSynergies(Long id);
 }

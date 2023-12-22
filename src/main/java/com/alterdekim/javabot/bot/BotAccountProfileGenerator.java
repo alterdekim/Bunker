@@ -11,7 +11,6 @@ public class BotAccountProfileGenerator {
                 p.getGender().getCanDie() ? Constants.TRUE : Constants.FALSE,
                 p.getGender().getIsMale() ? Constants.TRUE : Constants.FALSE,
                 p.getGender().getIsFemale() ? Constants.TRUE : Constants.FALSE,
-                p.getGender().getIsChildfree() ? Constants.TRUE : Constants.FALSE,
                 p.getAge(),
                 getStringById(textDataValService, p.getWork().getTextNameId()),
                 getStringById(textDataValService, p.getWork().getTextDescId()),
@@ -20,7 +19,8 @@ public class BotAccountProfileGenerator {
                 getStringById(textDataValService, p.getHobby().getTextDescId()),
                 getStringById(textDataValService, p.getHealth().getTextNameId()),
                 getStringById(textDataValService, p.getHealth().getTextDescId()),
-                (int) (p.getHealth().getHealth_index()*100f)
+                (int) (p.getHealth().getHealth_index()*100f),
+                p.getHealth().getIsChildfree() ? Constants.TRUE : Constants.FALSE
         );
     }
 

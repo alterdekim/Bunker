@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JoinFormula;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,7 +22,7 @@ public class Work {
     private Long id;
 
     @Column(nullable=false)
-    private Float heal;
+    private Float asocial;
 
     @Column(nullable=false)
     private Float power;
@@ -28,7 +31,7 @@ public class Work {
     private Float violence;
 
     @Column(nullable=false)
-    private Float food;
+    private Float foodstuffs;
 
     @Column(nullable = false)
     private Long textNameId;
@@ -36,11 +39,11 @@ public class Work {
     @Column(nullable = false)
     private Long textDescId;
 
-    public Work(Float heal, Float power, Float violence, Float food, Long textNameId, Long textDescId) {
-        this.heal = heal;
+    public Work(Float asocial, Float power, Float violence, Float foodstuffs, Long textNameId, Long textDescId) {
+        this.asocial = asocial;
         this.power = power;
         this.violence = violence;
-        this.food = food;
+        this.foodstuffs = foodstuffs;
         this.textNameId = textNameId;
         this.textDescId = textDescId;
     }

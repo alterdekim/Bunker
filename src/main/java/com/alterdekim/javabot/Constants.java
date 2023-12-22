@@ -16,7 +16,7 @@ public interface Constants {
     String HELP = "Help";
     String START_GAME_BTN = "Начать игру";
     String NOT_ADMIN_EXCEPTION = "Вы не администратор";
-    String ACCOUNT = "Ваша анкета:\nПол: %s (смертный: %s, мужчина: %s, женщина: %s, бесплоден: %s)\nВозраст: %d\nПрофессия: %s (%s)\nБагаж: %s (%s)\nХобби: %s\nЗдоровье: %s (%s) %d%%";
+    String ACCOUNT = "Ваша анкета:\nПол: %s (смертный: %s, мужчина: %s, женщина: %s)\nВозраст: %d\nПрофессия: %s (%s)\nБагаж: %s (%s)\nХобби: %s\nЗдоровье: %s (%s) %d%%, бесплоден: %s";
     String TRUE = "да";
     String FALSE = "нет";
     String PLAYERS_LESS_THAN_ZERO = "Игроков должно быть больше, чем 1.";
@@ -26,8 +26,8 @@ public interface Constants {
     String AGE_BTN = "Возраст";
     String GENDER_BTN = "Гендер";
     String LUGG_BTN = "Багаж";
-    String GENDER_MESAGE = "%s - пол: %s (смертный: %s, мужчина: %s, женщина: %s, бесплоден(а): %s)";
-    String HEALTH_MESSAGE = "%s - здоровье: %s (%s) %d%%";
+    String GENDER_MESAGE = "%s - пол: %s (смертный: %s, мужчина: %s, женщина: %s)";
+    String HEALTH_MESSAGE = "%s - здоровье: %s (%s) %d%%, бесплоден(а): %s";
     String SHOW_TIME = "Время выбрать, какую часть анкеты показать в этом раунде?";
     String AGE_MESSAGE = "%s - возраст: %d";
     String HOBBY_MESSAGE = "%s - хобби: %s";

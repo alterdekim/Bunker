@@ -5,6 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
+import org.hibernate.annotations.WhereJoinTable;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,11 +23,11 @@ public class Luggage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Luggage(Float violence, Float power, Float heal, Float food, Boolean garbage, Long textNameId, Long textDescId) {
+    public Luggage(Float violence, Float power, Float asocial, Float foodstuffs, Boolean garbage, Long textNameId, Long textDescId) {
         this.violence = violence;
         this.power = power;
-        this.heal = heal;
-        this.food = food;
+        this.asocial = asocial;
+        this.foodstuffs = foodstuffs;
         this.garbage = garbage;
         this.textNameId = textNameId;
         this.textDescId = textDescId;
@@ -33,11 +39,11 @@ public class Luggage {
     @Column(nullable=false)
     private Float power;
 
-    @Column(nullable=false)
-    private Float heal;
+    @Column(nullable = false)
+    private Float asocial;
 
     @Column(nullable=false)
-    private Float food;
+    private Float foodstuffs;
 
     @Column(nullable=false)
     private Boolean garbage;

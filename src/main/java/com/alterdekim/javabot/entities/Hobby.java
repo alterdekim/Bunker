@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JoinFormula;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,11 +17,11 @@ import lombok.Setter;
 @Table(name = "hobby")
 public class Hobby {
 
-    public Hobby(Float heal, Float power, Float violence, Float food, Long textDescId) {
-        this.heal = heal;
+    public Hobby(Float foodstuffs, Float power, Float violence, Float asocial, Long textDescId) {
+        this.foodstuffs = foodstuffs;
         this.power = power;
         this.violence = violence;
-        this.food = food;
+        this.asocial = asocial;
         this.textDescId = textDescId;
     }
 
@@ -26,8 +29,8 @@ public class Hobby {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
-    private Float heal;
+    @Column(nullable = false)
+    private Float asocial;
 
     @Column(nullable=false)
     private Float power;
@@ -36,7 +39,7 @@ public class Hobby {
     private Float violence;
 
     @Column(nullable=false)
-    private Float food;
+    private Float foodstuffs;
 
     @Column(nullable = false)
     private Long textDescId;
