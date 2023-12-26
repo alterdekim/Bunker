@@ -16,15 +16,15 @@ public class LiveFormula {
             gender += p.getGender().getIsFemale() ? 1 : 0;
             gender = p.getHealth().getIsChildfree() ? 0 : gender;
             gender *= 0.5D;
-            double work = (p.getWork().getFoodstuffs().doubleValue() +
-                    p.getWork().getPower().doubleValue()) - ((p.getWork().getViolence().doubleValue() + p.getWork().getAsocial().doubleValue()) * 1.2d);
-            double luggage = (p.getLuggage().getFoodstuffs().doubleValue() +
-                    p.getLuggage().getPower().doubleValue()) - ((p.getLuggage().getViolence().doubleValue() + p.getLuggage().getAsocial().doubleValue()) * 1.2d);
+            double work = ((p.getWork().getFoodstuffs().doubleValue() +
+                    p.getWork().getPower().doubleValue()) * 0.5d) - (((p.getWork().getViolence().doubleValue() + p.getWork().getAsocial().doubleValue()) / 2.0d) * 1.2d);
+            double luggage = ((p.getLuggage().getFoodstuffs().doubleValue() +
+                    p.getLuggage().getPower().doubleValue()) * 0.5d) - (((p.getLuggage().getViolence().doubleValue() + p.getLuggage().getAsocial().doubleValue()) / 2.0d) * 1.2d);
             luggage = p.getLuggage().getGarbage() ? 0 : luggage;
-            double hobby = (p.getHobby().getFoodstuffs().doubleValue() +
-                    p.getHobby().getPower().doubleValue()) - ((p.getHobby().getViolence().doubleValue() + p.getHobby().getAsocial().doubleValue()) * 1.2d);
+            double hobby = ((p.getHobby().getFoodstuffs().doubleValue() +
+                    p.getHobby().getPower().doubleValue()) / 2.0d) - (((p.getHobby().getViolence().doubleValue() + p.getHobby().getAsocial().doubleValue()) / 2.0d) * 1.2d);
             double health = p.getHealth().getHealth_index().doubleValue();
-            i += (age + gender + work + luggage + hobby + health);
+            i += ((age + gender + work + luggage + hobby + health) / 6.0d);
         }
         i = i / ((double) playerList.size());
         double _i = i;
